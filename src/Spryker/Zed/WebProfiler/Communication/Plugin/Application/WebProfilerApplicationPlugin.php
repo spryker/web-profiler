@@ -11,10 +11,10 @@ use Spryker\Service\Container\ContainerInterface;
 use Spryker\Shared\ApplicationExtension\Dependency\Plugin\ApplicationPluginInterface;
 use Spryker\Shared\ApplicationExtension\Dependency\Plugin\BootableApplicationPluginInterface;
 use Spryker\Shared\EventDispatcher\EventDispatcherInterface;
+use Spryker\Shared\WebProfiler\UrlGenerator\WebDebugToolbarUrlGenerator;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 use Symfony\Bridge\Twig\Extension\CodeExtension;
 use Symfony\Bridge\Twig\Extension\ProfilerExtension;
-use Symfony\Bundle\WebProfilerBundle\Controller\ExceptionController;
 use Symfony\Bundle\WebProfilerBundle\Controller\ExceptionPanelController;
 use Symfony\Bundle\WebProfilerBundle\Controller\ProfilerController;
 use Symfony\Bundle\WebProfilerBundle\Controller\RouterController;
@@ -232,7 +232,7 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
     /**
      * @param \Spryker\Service\Container\ContainerInterface $container
      *
-     * @return array<array>
+     * @return array<array<mixed>>
      */
     protected function getRouteDefinitions(ContainerInterface $container): array
     {
@@ -254,17 +254,9 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
         };
 
         $exceptionController = function () use ($container) {
-            if (class_exists(ExceptionPanelController::class)) {
-                return new ExceptionPanelController(
-                    new HtmlErrorRenderer($container->get('debug')),
-                    $container->get(static::SERVICE_PROFILER),
-                );
-            }
-
-            return new ExceptionController(
+            return new ExceptionPanelController(
+                new HtmlErrorRenderer($container->get('debug')),
                 $container->get(static::SERVICE_PROFILER),
-                $container->get(static::SERVICE_TWIG),
-                $container->get('debug'),
             );
         };
 
@@ -285,7 +277,7 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
     }
 
     /**
-     * @return array<array>
+     * @return array<array<string>>
      */
     protected function getDataCollectorPluginTemplates(): array
     {
@@ -319,7 +311,7 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
         $dispatcher = $container->get(static::SERVICE_DISPATCHER);
 
         $dispatcher->addSubscriber(new ProfilerListener($container->get(static::SERVICE_PROFILER), $container->get(static::SERVICE_REQUEST_STACK), null, false, false));
-        $dispatcher->addSubscriber(new WebDebugToolbarListener($container->get(static::SERVICE_TWIG), false, WebDebugToolbarListener::ENABLED));
+        $dispatcher->addSubscriber(new WebDebugToolbarListener($container->get(static::SERVICE_TWIG), false, WebDebugToolbarListener::ENABLED, new WebDebugToolbarUrlGenerator()));
         $dispatcher->addSubscriber($container->get(static::SERVICE_PROFILER)->get(static::SERVICE_REQUEST));
 
         return $container;

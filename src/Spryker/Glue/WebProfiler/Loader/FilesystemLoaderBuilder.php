@@ -25,9 +25,6 @@ class FilesystemLoaderBuilder implements FilesystemLoaderBuilderInterface
     ) {
     }
 
-    /**
-     * @return \Spryker\Shared\Twig\Loader\FilesystemLoaderInterface
-     */
     public function createFilesystemLoader(): FilesystemLoaderInterface
     {
         $filesystem = new FilesystemLoader();
@@ -57,11 +54,6 @@ class FilesystemLoaderBuilder implements FilesystemLoaderBuilderInterface
         return $filesystem;
     }
 
-    /**
-     * @param string $templateName
-     *
-     * @return string|null
-     */
     protected function parseNamespaceFromTemplateName(string $templateName): ?string
     {
         if (!str_starts_with($templateName, '@')) {

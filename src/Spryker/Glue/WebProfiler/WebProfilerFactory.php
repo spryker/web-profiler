@@ -28,17 +28,11 @@ use Twig\Profiler\Profile;
  */
 class WebProfilerFactory extends AbstractFactory
 {
-    /**
-     * @return \Spryker\Shared\Twig\Loader\FilesystemLoaderInterface
-     */
     public function createTwigFilesystemLoader(): FilesystemLoaderInterface
     {
         return $this->createFilesystemLoaderBuilder()->createFilesystemLoader();
     }
 
-    /**
-     * @return \Spryker\Glue\WebProfiler\Loader\FilesystemLoaderBuilderInterface
-     */
     public function createFilesystemLoaderBuilder(): FilesystemLoaderBuilderInterface
     {
         return new FilesystemLoaderBuilder(
@@ -55,57 +49,36 @@ class WebProfilerFactory extends AbstractFactory
         return $this->getProvidedDependency(WebProfilerDependencyProvider::PLUGINS_DATA_COLLECTORS);
     }
 
-    /**
-     * @return \Symfony\Component\Stopwatch\Stopwatch
-     */
     public function createStopwatch(): Stopwatch
     {
         return new Stopwatch();
     }
 
-    /**
-     * @return \Symfony\Component\HttpKernel\Profiler\Profiler
-     */
     public function createProfiler(): Profiler
     {
         return new Profiler($this->createProfilerStorage());
     }
 
-    /**
-     * @return \Symfony\Component\HttpKernel\Profiler\ProfilerStorageInterface
-     */
     public function createProfilerStorage(): ProfilerStorageInterface
     {
         return new FileProfilerStorage('file:' . $this->getConfig()->getProfilerCacheDirectory());
     }
 
-    /**
-     * @return \Twig\Profiler\Profile
-     */
     public function createProfile(): Profile
     {
         return new Profile();
     }
 
-    /**
-     * @return \Symfony\Component\Form\Extension\DataCollector\FormDataCollectorInterface
-     */
     public function createFormDataCollector(): FormDataCollectorInterface
     {
         return new FormDataCollector($this->createFormDataExtractor());
     }
 
-    /**
-     * @return \Symfony\Component\Form\Extension\DataCollector\FormDataExtractorInterface
-     */
     public function createFormDataExtractor(): FormDataExtractorInterface
     {
         return new FormDataExtractor();
     }
 
-    /**
-     * @return \Symfony\Component\Form\FormTypeExtensionInterface
-     */
     public function createDataCollectorTypeExtension(): FormTypeExtensionInterface
     {
         return new DataCollectorTypeExtension($this->createFormDataCollector());

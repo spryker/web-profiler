@@ -43,11 +43,6 @@ class WebProfilerDependencyProvider extends AbstractBundleDependencyProvider
         return $container;
     }
 
-    /**
-     * @param \Spryker\Zed\Kernel\Container $container
-     *
-     * @return \Spryker\Zed\Kernel\Container
-     */
     protected function addDataCollectorPlugins(Container $container): Container
     {
         $container->set(static::PLUGINS_DATA_COLLECTORS, function () {

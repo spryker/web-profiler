@@ -11,8 +11,5 @@ use Spryker\Shared\Twig\Loader\FilesystemLoaderInterface;
 
 interface FilesystemLoaderBuilderInterface
 {
-    /**
-     * @return \Spryker\Shared\Twig\Loader\FilesystemLoaderInterface
-     */
     public function createFilesystemLoader(): FilesystemLoaderInterface;
 }

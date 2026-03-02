@@ -139,11 +139,6 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
         return $container;
     }
 
-    /**
-     * @param \Spryker\Service\Container\ContainerInterface $container
-     *
-     * @return \Spryker\Service\Container\ContainerInterface
-     */
     protected function extendEventDispatcher(ContainerInterface $container): ContainerInterface
     {
         $container->extend(static::SERVICE_DISPATCHER, function (EventDispatcherInterface $dispatcher, ContainerInterface $container) {
@@ -153,11 +148,6 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
         return $container;
     }
 
-    /**
-     * @param \Spryker\Service\Container\ContainerInterface $container
-     *
-     * @return \Spryker\Service\Container\ContainerInterface
-     */
     protected function extendRouter(ContainerInterface $container): ContainerInterface
     {
         $container->extend(static::SERVICE_ROUTER, function (ChainRouter $chainRouter, ContainerInterface $container) {
@@ -169,11 +159,6 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
         return $container;
     }
 
-    /**
-     * @param \Spryker\Service\Container\ContainerInterface $container
-     *
-     * @return \Twig\Environment
-     */
     protected function getTwigEnvironment(ContainerInterface $container): Environment
     {
         if ($this->twig !== null) {
@@ -202,12 +187,6 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
         return $this->twig;
     }
 
-    /**
-     * @param \Symfony\Component\HttpKernel\Profiler\Profiler $profiler
-     * @param \Spryker\Service\Container\ContainerInterface $container
-     *
-     * @return \Symfony\Component\HttpKernel\Profiler\Profiler
-     */
     protected function addDataCollectorPlugins(Profiler $profiler, ContainerInterface $container): Profiler
     {
         foreach ($this->getFactory()->getDataCollectorPlugins() as $dataCollectorPlugin) {
@@ -217,11 +196,6 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
         return $profiler;
     }
 
-    /**
-     * @param \Spryker\Service\Container\ContainerInterface $container
-     *
-     * @return \Symfony\Component\Routing\RouterInterface
-     */
     protected function getRouter(ContainerInterface $container): RouterInterface
     {
         $loader = new ClosureLoader();
@@ -357,11 +331,6 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
         return $container;
     }
 
-    /**
-     * @param \Symfony\Component\HttpKernel\Event\ControllerEvent $event
-     *
-     * @return void
-     */
     protected function onKernelController(ControllerEvent $event): void
     {
         $currentController = $event->getController();
@@ -380,9 +349,6 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
         }
     }
 
-    /**
-     * @return bool
-     */
     protected function shouldSkipWebProfiler(): bool
     {
         if (!$this->getConfig()->isWebProfilerEnabled()) {
@@ -398,11 +364,6 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
         return $this->matchesSkipUriPattern($requestUri);
     }
 
-    /**
-     * @param string $requestUri
-     *
-     * @return bool
-     */
     protected function matchesSkipUriPattern(string $requestUri): bool
     {
         foreach ($this->getConfig()->getSkipProfilingUriPatterns() as $pattern) {

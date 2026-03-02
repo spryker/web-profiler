@@ -14,9 +14,6 @@ use Symfony\Component\HttpKernel\DataCollector\RequestDataCollector as SymfonyRe
  */
 class RequestDataCollector extends SymfonyRequestDataCollector
 {
-    /**
-     * @return string
-     */
     public function getMethod(): string
     {
         return $this->data['method'] ?? 'undefined';

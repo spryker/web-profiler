@@ -25,11 +25,6 @@ class WebProfilerDependencyProvider extends AbstractBundleDependencyProvider
      */
     public const PLUGINS_TWIG = 'PLUGINS_TWIG';
 
-    /**
-     * @param \Spryker\Glue\Kernel\Container $container
-     *
-     * @return \Spryker\Glue\Kernel\Container
-     */
     public function provideDependencies(Container $container): Container
     {
         $container = $this->addDataCollectorPlugins($container);
@@ -38,11 +33,6 @@ class WebProfilerDependencyProvider extends AbstractBundleDependencyProvider
         return $container;
     }
 
-    /**
-     * @param \Spryker\Glue\Kernel\Container $container
-     *
-     * @return \Spryker\Glue\Kernel\Container
-     */
     protected function addDataCollectorPlugins(Container $container): Container
     {
         $container->set(static::PLUGINS_DATA_COLLECTORS, function () {
@@ -60,11 +50,6 @@ class WebProfilerDependencyProvider extends AbstractBundleDependencyProvider
         return [];
     }
 
-    /**
-     * @param \Spryker\Glue\Kernel\Container $container
-     *
-     * @return \Spryker\Glue\Kernel\Container
-     */
     protected function addTwigPlugins(Container $container): Container
     {
         $container->set(static::PLUGINS_TWIG, function () {

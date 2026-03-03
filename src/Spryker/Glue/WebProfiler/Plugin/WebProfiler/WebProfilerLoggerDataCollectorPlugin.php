@@ -7,14 +7,18 @@
 
 namespace Spryker\Glue\WebProfiler\Plugin\WebProfiler;
 
-use Spryker\Glue\WebProfiler\Plugin\Application\WebProfilerApplicationPlugin;
+use Monolog\Logger as MonologLogger;
 use Spryker\Service\Container\ContainerInterface;
+use Spryker\Shared\Log\LoggerTrait;
 use Spryker\Shared\WebProfilerExtension\Dependency\Plugin\WebProfilerDataCollectorPluginInterface;
+use Symfony\Bridge\Monolog\Processor\DebugProcessor;
 use Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface;
 use Symfony\Component\HttpKernel\DataCollector\LoggerDataCollector;
 
 class WebProfilerLoggerDataCollectorPlugin implements WebProfilerDataCollectorPluginInterface
 {
+    use LoggerTrait;
+
     /**
      * @var string
      */
@@ -61,6 +65,12 @@ class WebProfilerLoggerDataCollectorPlugin implements WebProfilerDataCollectorPl
      */
     public function getDataCollector(ContainerInterface $container): DataCollectorInterface
     {
-        return new LoggerDataCollector($container->get(WebProfilerApplicationPlugin::SERVICE_LOGGER));
+        $logger = $this->getLogger();
+
+        if ($logger instanceof MonologLogger) {
+            $logger->pushProcessor(new DebugProcessor());
+        }
+
+        return new LoggerDataCollector($logger);
     }
 }

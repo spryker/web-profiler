@@ -19,13 +19,19 @@
         "spryker/config": "^3.0.0",
         "spryker/container": "*",
         "spryker/event-dispatcher": "*",
-        "spryker/silex": "*"
+        "spryker/log": "*",
+        "spryker/monolog": "*",
+        "spryker/silex": "*",
+        "symfony/monolog-bridge": "*"
     },
     "suggest": {
+        "spryker/config": "If you want to use ServiceProvider plugins.",
         "spryker/container": "If you want to use the Router module.",
         "spryker/event-dispatcher": "If you want to use the EventDispatcher module.",
-        "spryker/config": "If you want to use ServiceProvider plugins.",
-        "spryker/silex": "If you want to use ServiceProvider plugins."
+        "spryker/log": "Add this module when using WebProfilerLoggerDataCollectorPlugin from this module.",
+        "spryker/monolog": "Add this module when using WebProfilerLoggerDataCollectorPlugin from this module.",
+        "spryker/silex": "If you want to use ServiceProvider plugins.",
+        "symfony/monolog-bridge": "Add this module when using WebProfilerLoggerDataCollectorPlugin from this module."
     },
     "autoload": {
         "psr-4": {

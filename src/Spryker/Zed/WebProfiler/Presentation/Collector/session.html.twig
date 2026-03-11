@@ -1,0 +1,91 @@
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar %}
+    {% set icon %}
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="#AAA" d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM9 8V6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9z"/></svg>
+    {% endset %}
+
+    {% set text %}
+        <div class="sf-toolbar-info-piece">
+            <b>Attributes</b>
+            <span class="sf-toolbar-status">{{ collector.sessionAttributes|length }}</span>
+        </div>
+        <div class="sf-toolbar-info-piece">
+            <b>Flashes</b>
+            <span class="sf-toolbar-status">{{ collector.flashes|length }}</span>
+        </div>
+    {% endset %}
+
+    {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { link: profiler_url }) }}
+{% endblock %}
+
+{% block menu %}
+<span class="label">
+    <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="#AAA" d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM9 8V6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9z"/></svg></span>
+    <strong>Session</strong>
+</span>
+{% endblock %}
+
+{% block panel %}
+    <h2>Session</h2>
+
+    <h3>Session Metadata</h3>
+
+    {% if collector.sessionMetadata is empty %}
+        <div class="empty">
+            <p>No session metadata</p>
+        </div>
+    {% else %}
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col" class="key">Key</th>
+                    <th scope="col">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for key, value in collector.sessionMetadata %}
+                    <tr>
+                        <th scope="row">{{ key }}</th>
+                        <td>{{ value }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    <h3>Session Attributes</h3>
+
+    {% if collector.sessionAttributes is empty %}
+        <div class="empty">
+            <p>No session attributes</p>
+        </div>
+    {% else %}
+        {{ profiler_dump(collector.sessionAttributes, maxDepth=1) }}
+    {% endif %}
+
+    <h3>Flash Messages</h3>
+
+    {% if collector.flashes is empty %}
+        <div class="empty">
+            <p>No flash messages</p>
+        </div>
+    {% else %}
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col" class="key">Type</th>
+                    <th scope="col">Messages</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for type, messages in collector.flashes %}
+                    <tr>
+                        <th scope="row">{{ type }}</th>
+                        <td>{{ messages|join(', ') }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}

@@ -36,6 +36,7 @@ class WebProfilerConfig extends AbstractBundleConfig
         return [
             __DIR__ . '/Presentation',
             dirname(dirname((string)$reflectionClass->getFileName())) . '/Resources/views',
+            __DIR__ . '/Presentation',
         ];
     }
 

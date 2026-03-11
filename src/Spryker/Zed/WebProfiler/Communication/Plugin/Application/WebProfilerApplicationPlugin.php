@@ -22,9 +22,11 @@ use Symfony\Bundle\WebProfilerBundle\EventListener\WebDebugToolbarListener;
 use Symfony\Bundle\WebProfilerBundle\Twig\WebProfilerExtension;
 use Symfony\Cmf\Component\Routing\ChainRouter;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
+use Symfony\Component\HttpKernel\DataCollector\RouterDataCollector;
 use Symfony\Component\HttpKernel\Debug\FileLinkFormatter;
 use Symfony\Component\HttpKernel\Debug\TraceableEventDispatcher;
 use Symfony\Component\HttpKernel\EventListener\ProfilerListener;
+use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Routing\Loader\ClosureLoader;
 use Symfony\Component\Routing\Route;
@@ -89,6 +91,8 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
      * @var string
      */
     public const SERVICE_REQUEST_STACK = 'request_stack';
+
+    protected const string SERVICE_DATA_COLLECTOR_ROUTER = 'router';
 
     /**
      * @var string
@@ -287,6 +291,12 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
         $dispatcher->addSubscriber(new ProfilerListener($container->get(static::SERVICE_PROFILER), $container->get(static::SERVICE_REQUEST_STACK), null, false, false));
         $dispatcher->addSubscriber(new WebDebugToolbarListener($container->get(static::SERVICE_TWIG), false, WebDebugToolbarListener::ENABLED, new WebDebugToolbarUrlGenerator()));
         $dispatcher->addSubscriber($container->get(static::SERVICE_PROFILER)->get(static::SERVICE_REQUEST));
+
+        $routerDataCollector = $container->get(static::SERVICE_PROFILER)->get(static::SERVICE_DATA_COLLECTOR_ROUTER);
+
+        if ($routerDataCollector instanceof RouterDataCollector) {
+            $dispatcher->addListener(KernelEvents::CONTROLLER, [$routerDataCollector, 'onKernelController']);
+        }
 
         return $container;
     }

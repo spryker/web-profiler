@@ -1,0 +1,229 @@
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar %}{% endblock %}
+
+{% block menu %}
+<span class="label">
+    <span class="icon">{{ include('@WebProfiler/Icon/router.svg') }}</span>
+    <strong>Routing</strong>
+</span>
+{% endblock %}
+
+{% block panel %}
+    {% set request_collector = profile.collectors.request %}
+
+    {% set spryker_attrs = {} %}
+    {% set security_attrs = {} %}
+    {% for key, value in request_collector.requestAttributes.all %}
+        {% if key in ['module', 'controller', 'action'] %}
+            {% set spryker_attrs = spryker_attrs|merge({(key): value}) %}
+        {% elseif key in ['_security_firewall_run', '_redirected'] %}
+            {% set security_attrs = security_attrs|merge({(key): value}) %}
+        {% endif %}
+    {% endfor %}
+
+    <h2>Routing</h2>
+
+    <div class="metrics">
+        <div class="metric">
+            <span class="value">{{ request_collector.route ?: '(none)' }}</span>
+            <span class="label">Matched route</span>
+        </div>
+        <div class="metric">
+            <span class="value">{{ request_collector.method }}</span>
+            <span class="label">Method</span>
+        </div>
+        <div class="metric">
+            <span class="value">{{ request_collector.pathInfo }}</span>
+            <span class="label">Path</span>
+        </div>
+    </div>
+
+    {% if spryker_attrs is not empty %}
+        <h3>Spryker Controller Resolution</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if spryker_attrs.module is defined %}
+                    <tr>
+                        <td>Module</td>
+                        <td>{{ spryker_attrs.module }}</td>
+                    </tr>
+                {% endif %}
+                {% if spryker_attrs.controller is defined %}
+                    <tr>
+                        <td>Controller</td>
+                        <td>{{ spryker_attrs.controller }}</td>
+                    </tr>
+                {% endif %}
+                {% if spryker_attrs.action is defined %}
+                    <tr>
+                        <td>Action</td>
+                        <td>{{ spryker_attrs.action }}</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% set ctrl = request_collector.controller %}
+    {% if ctrl is iterable and ctrl.class is defined %}
+        <h3>Controller</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Class</td>
+                    <td><code>{{ ctrl.class }}</code></td>
+                </tr>
+                {% if ctrl.method is defined %}
+                    <tr>
+                        <td>Method</td>
+                        <td><code>{{ ctrl.method }}</code></td>
+                    </tr>
+                {% endif %}
+                {% if ctrl.file is defined %}
+                    <tr>
+                        <td>File</td>
+                        <td>{{ ctrl.file }}{% if ctrl.line is defined %} (line {{ ctrl.line }}){% endif %}</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    {% elseif ctrl is not iterable and ctrl != 'n/a' %}
+        <h3>Controller</h3>
+        <div class="card"><code>{{ ctrl }}</code></div>
+    {% endif %}
+
+    {% if request_collector.route %}
+        <h3>Route Parameters</h3>
+
+        {% if request_collector.routeParams is empty %}
+            <div class="empty">
+                <p>No parameters.</p>
+            </div>
+        {% else %}
+            {{ include('@WebProfiler/Profiler/table.html.twig', { data: request_collector.routeParams, labels: ['Name', 'Value'] }, with_context = false) }}
+        {% endif %}
+    {% endif %}
+
+    {% set redirect_from = request_collector.redirect %}
+    {% if redirect_from %}
+        <h3>Redirected From</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if profile.parent %}
+                    <tr>
+                        <td>Path</td>
+                        <td><code>{{ profile.parent.collector('request').pathInfo }}</code></td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <td>Status</td>
+                    <td><span class="status-warning">{{ redirect_from.status_code|default('302') }} {{ redirect_from.status_text|default('') }}</span></td>
+                </tr>
+                {% if redirect_from.route is defined %}
+                    <tr>
+                        <td>Route</td>
+                        <td>{{ redirect_from.route }}</td>
+                    </tr>
+                {% endif %}
+                {% if redirect_from.method is defined %}
+                    <tr>
+                        <td>Method</td>
+                        <td>{{ redirect_from.method }}</td>
+                    </tr>
+                {% endif %}
+                {% if redirect_from.controller is defined %}
+                    <tr>
+                        <td>Controller</td>
+                        <td>
+                            {% if redirect_from.controller is iterable and redirect_from.controller.class is defined %}
+                                <code>{{ redirect_from.controller.class }}::{{ redirect_from.controller.method|default('') }}</code>
+                            {% else %}
+                                <code>{{ redirect_from.controller }}</code>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if redirect_from.token is defined %}
+                    <tr>
+                        <td>Profiler Token</td>
+                        <td><a href="{{ path('_profiler', { token: redirect_from.token }) }}">{{ redirect_from.token }}</a></td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if collector.redirect %}
+        <h3>Redirects To</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Path</td>
+                    <td><code>{{ collector.targetUrl }}</code></td>
+                </tr>
+                {% if collector.targetRoute %}
+                    <tr>
+                        <td>Route</td>
+                        <td>{{ collector.targetRoute }}</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if security_attrs is not empty %}
+        <h3>Security</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if security_attrs._security_firewall_run is defined %}
+                    <tr>
+                        <td>Firewall</td>
+                        <td>{{ security_attrs._security_firewall_run }}</td>
+                    </tr>
+                {% endif %}
+                {% if security_attrs._redirected is defined and security_attrs._redirected %}
+                    <tr>
+                        <td>Redirected</td>
+                        <td>Yes</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}

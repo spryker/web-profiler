@@ -105,6 +105,8 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
      */
     public const SERVICE_ROUTER = 'routers';
 
+    protected const string SERVICE_WEB_PROFILER_CONTROLLER_PROFILER = 'web_profiler.controller.profiler';
+
     /**
      * @var int
      */
@@ -143,6 +145,10 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
 
         $container->set(static::SERVICE_TWIG_PROFILE, function () {
             return $this->getFactory()->createProfile();
+        });
+
+        $container->set(static::SERVICE_WEB_PROFILER_CONTROLLER_PROFILER, function (ContainerInterface $container) {
+            return $this->createProfilerController($container);
         });
 
         return $container;
@@ -213,6 +219,16 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
         return new Router($loader, $resource, []);
     }
 
+    protected function createProfilerController(ContainerInterface $container): ProfilerController
+    {
+        return new ProfilerController(
+            $container->get(static::SERVICE_ROUTER),
+            $container->get(static::SERVICE_PROFILER),
+            $container->get(static::SERVICE_TWIG),
+            $this->getDataCollectorPluginTemplates(),
+        );
+    }
+
     /**
      * @param \Spryker\Service\Container\ContainerInterface $container
      *
@@ -221,12 +237,7 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
     protected function getRouteDefinitions(ContainerInterface $container): array
     {
         $profilerController = function () use ($container) {
-            return new ProfilerController(
-                $container->get(static::SERVICE_ROUTER),
-                $container->get(static::SERVICE_PROFILER),
-                $container->get(static::SERVICE_TWIG),
-                $this->getDataCollectorPluginTemplates(),
-            );
+            return $this->createProfilerController($container);
         };
 
         $routerController = function () use ($container) {

@@ -46,26 +46,36 @@ use Twig\Environment;
 class WebProfilerApplicationPlugin extends AbstractPlugin implements ApplicationPluginInterface, BootableApplicationPluginInterface
 {
     /**
+     * @api
+     *
      * @var string
      */
     public const SERVICE_STOPWATCH = 'stopwatch';
 
     /**
+     * @api
+     *
      * @var string
      */
     public const SERVICE_LOGGER = 'logger';
 
     /**
+     * @api
+     *
      * @var string
      */
     public const SERVICE_PROFILER = 'profiler';
 
     /**
+     * @api
+     *
      * @var string
      */
     public const SERVICE_TWIG_PROFILE = 'profile';
 
     /**
+     * @api
+     *
      * @uses \Spryker\Zed\Twig\Communication\Plugin\Application\TwigApplicationPlugin::SERVICE_TWIG
      *
      * @var string
@@ -73,6 +83,8 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
     public const SERVICE_TWIG = 'twig';
 
     /**
+     * @api
+     *
      * @uses \Spryker\Zed\Twig\Communication\Plugin\Application\TwigApplicationPlugin::SERVICE_CHARSET
      *
      * @var string
@@ -80,6 +92,8 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
     public const SERVICE_CHARSET = 'charset';
 
     /**
+     * @api
+     *
      * @uses \Spryker\Zed\EventDispatcher\Communication\Plugin\Application\EventDispatcherApplicationPlugin::SERVICE_DISPATCHER
      *
      * @var string
@@ -87,11 +101,15 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
     public const SERVICE_DISPATCHER = 'dispatcher';
 
     /**
+     * @api
+     *
      * @var string
      */
     public const SERVICE_REQUEST = 'request';
 
     /**
+     * @api
+     *
      * @var string
      */
     public const SERVICE_REQUEST_STACK = 'request_stack';
@@ -101,6 +119,8 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
     protected const string SERVICE_SESSION = 'session';
 
     /**
+     * @api
+     *
      * @var string
      */
     public const SERVICE_ROUTER = 'routers';

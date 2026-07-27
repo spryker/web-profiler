@@ -346,7 +346,7 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
     {
         $currentController = $event->getController();
 
-        if (!is_array($currentController) || count($currentController) !== 2) {
+        if (!is_array($currentController)) {
             return;
         }
 

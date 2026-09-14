@@ -12,7 +12,6 @@ namespace Spryker\Zed\WebProfiler\Communication\Plugin\Application;
 use Spryker\Service\Container\ContainerInterface;
 use Spryker\Shared\ApplicationExtension\Dependency\Plugin\ApplicationPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
-use Symfony\Bridge\Twig\Extension\CodeExtension;
 use Symfony\Bridge\Twig\Extension\ProfilerExtension;
 use Symfony\Bundle\WebProfilerBundle\Twig\WebProfilerExtension;
 use Symfony\Component\ErrorHandler\ErrorRenderer\FileLinkFormatter;
@@ -33,6 +32,20 @@ class WebProfilerConsoleTwigCompilationApplicationPlugin extends AbstractPlugin 
     protected const string DEFAULT_CHARSET = 'UTF-8';
 
     protected const string PROFILE_TOKEN = 'twig-warmer';
+
+    /**
+     * @var class-string<\Twig\Extension\ExtensionInterface>
+     *
+     * @uses \Symfony\Bundle\WebProfilerBundle\Profiler\CodeExtension Present since symfony/web-profiler-bundle 7.x.
+     */
+    protected const string CODE_EXTENSION_CLASS_WEB_PROFILER_BUNDLE = 'Symfony\Bundle\WebProfilerBundle\Profiler\CodeExtension';
+
+    /**
+     * @var class-string<\Twig\Extension\ExtensionInterface>
+     *
+     * @uses \Symfony\Bridge\Twig\Extension\CodeExtension Present in symfony/twig-bridge up to 6.4, internal from 6.4 on.
+     */
+    protected const string CODE_EXTENSION_CLASS_TWIG_BRIDGE = 'Symfony\Bridge\Twig\Extension\CodeExtension';
 
     /**
      * {@inheritDoc}
@@ -57,8 +70,10 @@ class WebProfilerConsoleTwigCompilationApplicationPlugin extends AbstractPlugin 
                 return $twig;
             }
 
+            $codeExtensionClassName = $this->resolveCodeExtensionClassName();
+
             // @phpstan-ignore new.internalClass, method.internalClass
-            $twig->addExtension(new CodeExtension(new FileLinkFormatter(null), '', static::DEFAULT_CHARSET));
+            $twig->addExtension(new $codeExtensionClassName(new FileLinkFormatter(null), '', static::DEFAULT_CHARSET));
             // @phpstan-ignore new.internalClass, method.internalClass
             $twig->addExtension(new WebProfilerExtension());
             $twig->addExtension(new ProfilerExtension(new Profile(static::PROFILE_TOKEN), new Stopwatch()));
@@ -67,5 +82,17 @@ class WebProfilerConsoleTwigCompilationApplicationPlugin extends AbstractPlugin 
         });
 
         return $container;
+    }
+
+    /**
+     * @return class-string<\Twig\Extension\ExtensionInterface>
+     */
+    protected function resolveCodeExtensionClassName(): string
+    {
+        if (class_exists(static::CODE_EXTENSION_CLASS_WEB_PROFILER_BUNDLE)) {
+            return static::CODE_EXTENSION_CLASS_WEB_PROFILER_BUNDLE;
+        }
+
+        return static::CODE_EXTENSION_CLASS_TWIG_BRIDGE;
     }
 }

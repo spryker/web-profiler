@@ -16,7 +16,6 @@ use Spryker\Shared\Kernel\Store;
 use Spryker\Shared\WebProfiler\DataCollector\RequestDataCollector;
 use Spryker\Shared\WebProfiler\WebProfilerConstants;
 use Symfony\Bridge\Twig\DataCollector\TwigDataCollector;
-use Symfony\Bridge\Twig\Extension\CodeExtension;
 use Symfony\Bridge\Twig\Extension\ProfilerExtension;
 use Symfony\Bundle\WebProfilerBundle\Controller\ExceptionController;
 use Symfony\Bundle\WebProfilerBundle\Controller\ExceptionPanelController;
@@ -51,6 +50,20 @@ use Twig\Profiler\Profile;
  */
 class WebProfilerServiceProvider implements ServiceProviderInterface, ControllerProviderInterface
 {
+    /**
+     * @var class-string<\Twig\Extension\ExtensionInterface>
+     *
+     * @uses \Symfony\Bundle\WebProfilerBundle\Profiler\CodeExtension Present since symfony/web-profiler-bundle 7.x.
+     */
+    protected const string CODE_EXTENSION_CLASS_WEB_PROFILER_BUNDLE = 'Symfony\Bundle\WebProfilerBundle\Profiler\CodeExtension';
+
+    /**
+     * @var class-string<\Twig\Extension\ExtensionInterface>
+     *
+     * @uses \Symfony\Bridge\Twig\Extension\CodeExtension Present in symfony/twig-bridge up to 6.4, internal from 6.4 on.
+     */
+    protected const string CODE_EXTENSION_CLASS_TWIG_BRIDGE = 'Symfony\Bridge\Twig\Extension\CodeExtension';
+
     /**
      * @param \Silex\Application $app
      *
@@ -220,7 +233,8 @@ class WebProfilerServiceProvider implements ServiceProviderInterface, Controller
         $app['code.file_link_format'] = null;
 
         $app['twig'] = $app->share($app->extend('twig', function ($twig, $app) {
-            $twig->addExtension(new CodeExtension($app['code.file_link_format'], '', $app['charset']));
+            $codeExtensionClassName = $this->resolveCodeExtensionClassName();
+            $twig->addExtension(new $codeExtensionClassName($app['code.file_link_format'], '', $app['charset']));
 
             if (class_exists(WebProfilerExtension::class)) {
                 $twig->addExtension(new WebProfilerExtension());
@@ -269,6 +283,18 @@ class WebProfilerServiceProvider implements ServiceProviderInterface, Controller
         $controllers->get('/', 'web_profiler.controller.profiler:homeAction')->bind('_profiler_home');
 
         return $controllers;
+    }
+
+    /**
+     * @return class-string<\Twig\Extension\ExtensionInterface>
+     */
+    protected function resolveCodeExtensionClassName(): string
+    {
+        if (class_exists(static::CODE_EXTENSION_CLASS_WEB_PROFILER_BUNDLE)) {
+            return static::CODE_EXTENSION_CLASS_WEB_PROFILER_BUNDLE;
+        }
+
+        return static::CODE_EXTENSION_CLASS_TWIG_BRIDGE;
     }
 
     /**

@@ -13,7 +13,6 @@ use Spryker\Shared\ApplicationExtension\Dependency\Plugin\ApplicationPluginInter
 use Spryker\Shared\ApplicationExtension\Dependency\Plugin\BootableApplicationPluginInterface;
 use Spryker\Shared\EventDispatcher\EventDispatcherInterface;
 use Spryker\Shared\WebProfiler\UrlGenerator\WebDebugToolbarUrlGenerator;
-use Symfony\Bridge\Twig\Extension\CodeExtension;
 use Symfony\Bridge\Twig\Extension\ProfilerExtension;
 use Symfony\Bundle\WebProfilerBundle\Controller\ExceptionPanelController;
 use Symfony\Bundle\WebProfilerBundle\Controller\ProfilerController;
@@ -21,8 +20,8 @@ use Symfony\Bundle\WebProfilerBundle\Controller\RouterController;
 use Symfony\Bundle\WebProfilerBundle\EventListener\WebDebugToolbarListener;
 use Symfony\Bundle\WebProfilerBundle\Twig\WebProfilerExtension;
 use Symfony\Cmf\Component\Routing\ChainRouter;
+use Symfony\Component\ErrorHandler\ErrorRenderer\FileLinkFormatter;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
-use Symfony\Component\HttpKernel\Debug\FileLinkFormatter;
 use Symfony\Component\HttpKernel\Debug\TraceableEventDispatcher;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\EventListener\ProfilerListener;
@@ -100,6 +99,20 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
     protected const CONTROLLER_EVENT_PRIORITY = 1000;
 
     /**
+     * @var class-string<\Twig\Extension\ExtensionInterface>
+     *
+     * @uses \Symfony\Bundle\WebProfilerBundle\Profiler\CodeExtension Present since symfony/web-profiler-bundle 7.x.
+     */
+    protected const string CODE_EXTENSION_CLASS_WEB_PROFILER_BUNDLE = 'Symfony\Bundle\WebProfilerBundle\Profiler\CodeExtension';
+
+    /**
+     * @var class-string<\Twig\Extension\ExtensionInterface>
+     *
+     * @uses \Symfony\Bridge\Twig\Extension\CodeExtension Present in symfony/twig-bridge up to 6.4, internal from 6.4 on.
+     */
+    protected const string CODE_EXTENSION_CLASS_TWIG_BRIDGE = 'Symfony\Bridge\Twig\Extension\CodeExtension';
+
+    /**
      * @var \Twig\Environment|null
      */
     protected ?Environment $twig = null;
@@ -157,7 +170,12 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
     protected function extendRouter(ContainerInterface $container): ContainerInterface
     {
         $container->extend(static::SERVICE_ROUTER, function (ChainRouter $chainRouter, ContainerInterface $container) {
-            $chainRouter->add($this->getRouter($container), static::ROUTER_PRIORITY);
+            $ownRouter = $this->getRouter($container);
+            // ChainRouter::add() does not propagate its current RequestContext (host/scheme) to
+            // newly added routers, so this router would otherwise generate relative URLs even
+            // when an absolute URL is requested (e.g. by the WebProfiler toolbar's `url()` calls).
+            $ownRouter->setContext($chainRouter->getContext());
+            $chainRouter->add($ownRouter, static::ROUTER_PRIORITY);
 
             return $chainRouter;
         });
@@ -178,7 +196,8 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
         }
 
         $fileLinkFormatter = new FileLinkFormatter(null);
-        $twig->addExtension(new CodeExtension($fileLinkFormatter, '', $container->get(static::SERVICE_CHARSET)));
+        $codeExtensionClassName = $this->resolveCodeExtensionClassName();
+        $twig->addExtension(new $codeExtensionClassName($fileLinkFormatter, '', $container->get(static::SERVICE_CHARSET)));
         $twig->addExtension(new WebProfilerExtension());
         $twig->addExtension(new ProfilerExtension($container->get(static::SERVICE_TWIG_PROFILE), $container->get(static::SERVICE_STOPWATCH)));
 
@@ -191,6 +210,18 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
         $this->twig = $twig;
 
         return $this->twig;
+    }
+
+    /**
+     * @return class-string<\Twig\Extension\ExtensionInterface>
+     */
+    protected function resolveCodeExtensionClassName(): string
+    {
+        if (class_exists(static::CODE_EXTENSION_CLASS_WEB_PROFILER_BUNDLE)) {
+            return static::CODE_EXTENSION_CLASS_WEB_PROFILER_BUNDLE;
+        }
+
+        return static::CODE_EXTENSION_CLASS_TWIG_BRIDGE;
     }
 
     protected function addDataCollectorPlugins(Profiler $profiler, ContainerInterface $container): Profiler
@@ -271,6 +302,7 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
             ['/_profiler/phpinfo', [$profilerController, 'phpinfoAction'], '_profiler_phpinfo'],
             ['/_profiler/{token}/search/results', [$profilerController, 'searchResultsAction'], '_profiler_search_results'],
             ['/_profiler/{token}', [$profilerController, 'panelAction'], '_profiler'],
+            ['/_profiler/wdt/styles', [$profilerController, 'toolbarStylesheetAction'], '_wdt_stylesheet'],
             ['/_profiler/wdt/{token}', [$profilerController, 'toolbarAction'], '_wdt'],
             ['/_profiler/', [$profilerController, 'homeAction'], '_profiler_home'],
         ];

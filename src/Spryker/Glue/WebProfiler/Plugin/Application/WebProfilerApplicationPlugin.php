@@ -300,6 +300,7 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
             ['/_profiler/purge', [$profilerController, 'purgeAction'], '_profiler_purge'],
             ['/_profiler/info/{about}', [$profilerController, 'infoAction'], '_profiler_info'],
             ['/_profiler/phpinfo', [$profilerController, 'phpinfoAction'], '_profiler_phpinfo'],
+            ['/_profiler/font/{fontName}.woff2', [$profilerController, 'fontAction'], '_profiler_font'],
             ['/_profiler/{token}/search/results', [$profilerController, 'searchResultsAction'], '_profiler_search_results'],
             ['/_profiler/{token}', [$profilerController, 'panelAction'], '_profiler'],
             ['/_profiler/wdt/styles', [$profilerController, 'toolbarStylesheetAction'], '_wdt_stylesheet'],
